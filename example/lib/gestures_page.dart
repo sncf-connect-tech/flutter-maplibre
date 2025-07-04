@@ -12,7 +12,7 @@ class GesturesPage extends StatefulWidget {
 }
 
 class _GesturesPageState extends State<GesturesPage> {
-  final _selections = Map.fromEntries(
+  final Map<Gestures, bool> _selections = Map.fromEntries(
     Gestures.values.map((e) => MapEntry(e, false)),
   );
 
@@ -60,9 +60,4 @@ class _GesturesPageState extends State<GesturesPage> {
   }
 }
 
-enum Gestures {
-  rotate,
-  pan,
-  zoom,
-  tilt;
-}
+enum Gestures { rotate, pan, zoom, tilt }
