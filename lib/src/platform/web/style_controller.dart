@@ -41,7 +41,10 @@ class StyleControllerWeb implements StyleController {
   }
 
   @override
-  Future<List<String>> getAttributions() async {
+  Future<List<String>> getAttributions() async => getAttributions();
+
+  @override
+  List<String> getAttributionsSync() {
     final jsStyle = _map.getStyle();
     final sources = jsStyle?.sources.dartify() as Map<Object?, Object?>?;
     if (sources == null) return const [];
@@ -173,10 +176,7 @@ class StyleControllerWeb implements StyleController {
         }
         _map.addSource(
           source.id,
-          interop.SourceSpecification.geoJson(
-            type: 'geojson',
-            data: data,
-          ),
+          interop.SourceSpecification.geoJson(type: 'geojson', data: data),
         );
       case RasterDemSource():
         _map.addSource(
@@ -201,10 +201,7 @@ class StyleControllerWeb implements StyleController {
       case VectorSource():
         _map.addSource(
           source.id,
-          interop.SourceSpecification.vector(
-            type: 'vector',
-            url: source.url,
-          ),
+          interop.SourceSpecification.vector(type: 'vector', url: source.url),
         );
       case ImageSource():
         _map.addSource(
@@ -216,10 +213,7 @@ class StyleControllerWeb implements StyleController {
             // proceed in clockwise order.
             // https://github.com/maplibre/maplibre-gl-js/blob/87486a5ef2085e600e8fa4e31252629dd8488dcd/src/source/image_source.ts#L24
             coordinates: [
-              [
-                source.coordinates.topLeft.lng,
-                source.coordinates.topLeft.lat,
-              ],
+              [source.coordinates.topLeft.lng, source.coordinates.topLeft.lat],
               [
                 source.coordinates.topRight.lng,
                 source.coordinates.topRight.lat,
@@ -242,9 +236,7 @@ class StyleControllerWeb implements StyleController {
             type: 'video',
             urls: source.urls.jsify()!,
             coordinates: source.coordinates
-                .map(
-                  (e) => [e.lng, e.lat],
-                )
+                .map((e) => [e.lng, e.lat])
                 .toList(growable: false)
                 .jsify()!,
           ),
@@ -256,6 +248,7 @@ class StyleControllerWeb implements StyleController {
   void dispose() {}
 
   @override
-  void setProjection(MapProjection projection) => _map
-      .setProjection(interop.ProjectionSpecification(type: projection.name));
+  void setProjection(MapProjection projection) => _map.setProjection(
+    interop.ProjectionSpecification(type: projection.name),
+  );
 }

@@ -126,17 +126,15 @@ pitch: ${camera.pitch}'''),
                   onPressed: () async {
                     final camera = _controller.getCamera();
                     final lat = camera.center.lat.toDouble();
-                    final meters =
-                        await _controller.getMetersPerPixelAtLatitude(lat);
+                    final meters = await _controller
+                        .getMetersPerPixelAtLatitude(lat);
                     debugPrint('latitude: $lat: $meters m/px');
                     if (context.mounted) {
                       ScaffoldMessenger.of(context)
                         ..hideCurrentSnackBar()
                         ..showSnackBar(
                           SnackBar(
-                            content: Text(
-                              'latitude: $lat: $meters m/px',
-                            ),
+                            content: Text('latitude: $lat: $meters m/px'),
                           ),
                         );
                     }
@@ -184,16 +182,15 @@ pitch: ${camera.pitch}'''),
                 ),
                 OutlinedButton(
                   onPressed: () async {
-                    final offset =
-                        await _controller.toScreenLocation(Position(0, 0));
+                    final offset = await _controller.toScreenLocation(
+                      Position(0, 0),
+                    );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context)
                         ..hideCurrentSnackBar()
                         ..showSnackBar(
                           SnackBar(
-                            content: Text(
-                              'Offset(${offset.dx}, ${offset.dy})',
-                            ),
+                            content: Text('Offset(${offset.dx}, ${offset.dy})'),
                           ),
                         );
                     }
@@ -208,8 +205,10 @@ pitch: ${camera.pitch}'''),
           ),
           Expanded(
             child: MapLibreMap(
-              options:
-                  MapOptions(initCenter: Position(9.17, 47.68), initZoom: 3),
+              options: MapOptions(
+                initCenter: Position(9.17, 47.68),
+                initZoom: 3,
+              ),
               onMapCreated: (controller) => _controller = controller,
             ),
           ),

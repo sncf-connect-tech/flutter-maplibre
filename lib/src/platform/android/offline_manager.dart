@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ui';
 
 import 'package:jni/jni.dart';
 import 'package:maplibre/maplibre.dart';
 import 'package:maplibre/src/platform/android/extensions.dart';
-import 'package:maplibre/src/platform/android/jni/jni.dart' as jni;
+import 'package:maplibre/src/platform/android/jni.dart' as jni;
 
 /// MapLibre Android specific implementation of the [OfflineManager].
 class OfflineManagerAndroid implements OfflineManager {
@@ -15,11 +14,9 @@ class OfflineManagerAndroid implements OfflineManager {
 
   /// Create a new [OfflineManager].
   static Future<OfflineManager> createInstance() async {
-    final jContext = jni.MapLibreRegistry.INSTANCE!.getContext();
-    await runOnPlatformThread(() {
-      jni.MapLibre.getInstance(jContext);
-    });
-    final jManager = jni.OfflineManager.getInstance(jContext)!;
+    final jContext = jni.MapLibreRegistry.INSTANCE.getContext()!;
+    jni.MapLibre.getInstance(jContext);
+    final jManager = jni.OfflineManager.getInstance(jContext);
     return OfflineManagerAndroid._(jManager);
   }
 
@@ -49,8 +46,11 @@ class OfflineManagerAndroid implements OfflineManager {
             );
             completer.complete(regions);
           },
-          onError: (error) => completer
-              .completeError(error.toDartString(releaseOriginal: true)),
+          onError: (error) => completer.completeError(
+            error.toDartString(releaseOriginal: true),
+          ),
+          onError$async: true,
+          onMerge$async: true,
         ),
       ),
     );
@@ -74,6 +74,9 @@ class OfflineManagerAndroid implements OfflineManager {
               Exception(error.toDartString(releaseOriginal: true)),
             );
           },
+          onError$async: true,
+          onRegion$async: true,
+          onRegionNotFound$async: true,
         ),
       ),
     );
@@ -93,6 +96,8 @@ class OfflineManagerAndroid implements OfflineManager {
         jni.$OfflineManager$FileSourceCallback(
           onSuccess: completer.complete,
           onError: (error) => completer.completeError(Exception(error)),
+          onError$async: true,
+          onSuccess$async: true,
         ),
       ),
     );
@@ -107,6 +112,8 @@ class OfflineManagerAndroid implements OfflineManager {
         jni.$OfflineManager$FileSourceCallback(
           onSuccess: completer.complete,
           onError: (error) => completer.completeError(Exception(error)),
+          onError$async: true,
+          onSuccess$async: true,
         ),
       ),
     );
@@ -121,6 +128,8 @@ class OfflineManagerAndroid implements OfflineManager {
         jni.$OfflineManager$FileSourceCallback(
           onSuccess: completer.complete,
           onError: (error) => completer.completeError(Exception(error)),
+          onSuccess$async: true,
+          onError$async: true,
         ),
       ),
     );
@@ -135,6 +144,8 @@ class OfflineManagerAndroid implements OfflineManager {
         jni.$OfflineManager$FileSourceCallback(
           onSuccess: completer.complete,
           onError: (error) => completer.completeError(Exception(error)),
+          onSuccess$async: true,
+          onError$async: true,
         ),
       ),
     );
@@ -149,6 +160,8 @@ class OfflineManagerAndroid implements OfflineManager {
         jni.$OfflineManager$FileSourceCallback(
           onSuccess: completer.complete,
           onError: (error) => completer.completeError(Exception(error)),
+          onSuccess$async: true,
+          onError$async: true,
         ),
       ),
     );
@@ -177,6 +190,8 @@ class OfflineManagerAndroid implements OfflineManager {
             completer.complete(list);
           },
           onError: (error) => completer.completeError(Exception(error)),
+          onError$async: true,
+          onList$async: true,
         ),
       ),
     );
@@ -202,22 +217,18 @@ class OfflineManagerAndroid implements OfflineManager {
       maxZoom,
       pixelDensity,
     );*/
-    final jDefinition =
-        jni.Helpers.INSTANCE!.createOfflineTilePyramidRegionDefinition(
-      jMapStyleUrl,
-      jBounds,
-      minZoom,
-      maxZoom,
-      pixelDensity,
-    )!;
+    final jDefinition = jni.Helpers.INSTANCE
+        .createOfflineTilePyramidRegionDefinition(
+          jMapStyleUrl,
+          jBounds,
+          minZoom,
+          maxZoom,
+          pixelDensity,
+        );
 
     // convert the Map to a Java byte Array
     final metadataJson = jsonEncode(metadata);
-    final metadataBytes = utf8.encode(metadataJson);
-    final jMetadata = JByteArray(metadataBytes.length);
-    for (var i = 0; i < metadataBytes.length; i++) {
-      jMetadata[i] = metadataBytes[i];
-    }
+    final jMetadata = JByteArray.from(utf8.encode(metadataJson));
 
     _jManager.createOfflineRegion(
       jDefinition.as(jni.OfflineRegionDefinition.type),
@@ -235,8 +246,8 @@ class OfflineManagerAndroid implements OfflineManager {
                         loadedBytes: status.getCompletedResourceSize(),
                         loadedTiles: status.getCompletedResourceCount(),
                         totalTiles: status.getRequiredResourceCount(),
-                        totalTilesEstimated:
-                            !status.isRequiredResourceCountPrecise(),
+                        totalTilesEstimated: !status
+                            .isRequiredResourceCountPrecise(),
                         region: region,
                         downloadCompleted: status.isComplete(),
                       ),
@@ -267,12 +278,17 @@ class OfflineManagerAndroid implements OfflineManager {
                     Exception('Tile count limit exceeded: $limit'),
                   );
                 },
+                onError$async: true,
+                mapboxTileCountLimitExceeded$async: true,
+                onStatusChanged$async: true,
               ),
             );
             jRegion.setObserver(jObserver);
             jRegion.setDownloadState(jni.OfflineRegion.STATE_ACTIVE);
           },
           onError: (error) => stream.addError(Exception(error)),
+          onError$async: true,
+          onCreate$async: true,
         ),
       ),
     );
