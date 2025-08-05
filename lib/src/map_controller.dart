@@ -42,23 +42,15 @@ abstract interface class MapController {
   Future<List<Position>> toLngLats(List<Offset> screenLocations);
 
   /// Convert a latitude/longitude coordinate to a screen location.
-  ///
-  /// Only supported on web.
   Offset toScreenLocationSync(Position lngLat);
 
   /// Get the latitude/longitude coordinate for a screen location.
-  ///
-  /// Only supported on web.
   Position toLngLatSync(Offset screenLocation);
 
   /// Convert a latitude/longitude coordinate to a screen location.
-  ///
-  /// Only supported on web.
   List<Offset> toScreenLocationsSync(List<Position> lngLats);
 
   /// Get the latitude/longitude coordinate for a screen location.
-  ///
-  /// Only supported on web.
   List<Position> toLngLatsSync(List<Offset> screenLocations);
 
   /// Instantly move the map camera to a new location.
@@ -119,13 +111,9 @@ abstract interface class MapController {
   /// The distance between pixels decreases as the latitude approaches the
   /// poles. This relationship parallels the relationship between longitudinal
   /// coordinates at different latitudes.
-  ///
-  /// Only supported on web.
   double getMetersPerPixelAtLatitudeSync(double latitude);
 
   /// The smallest bounding box that includes the visible region.
-  ///
-  /// Only supported on web.
   LngLatBounds getVisibleRegionSync();
 
   /// Queries the map for rendered features.
@@ -139,6 +127,7 @@ abstract interface class MapController {
     bool accuracyAnimation = true,
     bool compassAnimation = true,
     bool pulse = true,
+    BearingRenderMode bearingRenderMode = BearingRenderMode.gps,
   });
 
   /// Track the user location on the map
@@ -152,6 +141,12 @@ abstract interface class MapController {
     bool trackLocation = true,
     BearingTrackMode trackBearing = BearingTrackMode.gps,
   });
+
+  /// Set a new map style.
+  ///
+  /// All temporary layers will get removed as well. You can apply them again in
+  /// the [MapLibreMap.onStyleLoaded] callback.
+  Future<void> setStyle(String style);
 }
 
 /// The mode how the bearing should get tracked on the map.
@@ -166,7 +161,7 @@ enum BearingTrackMode {
   compass,
 
   /// Use the bearing provided by the GPS location (normalized).
-  gps;
+  gps,
 }
 
 /// The mode how render the location on the map.
@@ -181,5 +176,5 @@ enum BearingRenderMode {
   compass,
 
   /// Use the GPS location data to render the bearing.
-  gps;
+  gps,
 }

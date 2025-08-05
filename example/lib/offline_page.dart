@@ -13,7 +13,8 @@ class OfflinePage extends StatefulWidget {
 }
 
 class _OfflinePageState extends State<OfflinePage> {
-  final _futureOfflineManager = OfflineManager.createInstance();
+  final Future<OfflineManager> _futureOfflineManager =
+      OfflineManager.createInstance();
   String? _downloadProgressWorld;
   String? _downloadProgressBregenz;
   final _boundsWorld = const LngLatBounds(
@@ -74,9 +75,7 @@ class _OfflinePageState extends State<OfflinePage> {
                                 } on Exception catch (error, stacktrace) {
                                   _print(error.toString());
                                   debugPrintStack(stackTrace: stacktrace);
-                                  setState(
-                                    () => _downloadProgressWorld = null,
-                                  );
+                                  setState(() => _downloadProgressWorld = null);
                                 }
                               },
                               icon: const Icon(Icons.download),
@@ -102,7 +101,7 @@ class _OfflinePageState extends State<OfflinePage> {
                       : Text(_downloadProgressWorld!),
                 ),
                 ListTile(
-                  title: const Text('Download Bregenz'),
+                  title: const Text('Download Region'),
                   trailing: _downloadProgressBregenz == null
                       ? Row(
                           mainAxisSize: MainAxisSize.min,
@@ -163,27 +162,12 @@ class _OfflinePageState extends State<OfflinePage> {
                       : Text(_downloadProgressBregenz!),
                 ),
                 ListTile(
-                  title: const Text('Merge Offline Regions'),
-                  onTap: () async {
-                    try {
-                      final regions = await manager.mergeOfflineRegions(
-                        path: 'region.mbtiles',
-                      );
-                      _print(
-                        'offline regions merged:\n${regions.join('\n')}',
-                      );
-                    } on Exception catch (error, stacktrace) {
-                      _print(error.toString());
-                      debugPrintStack(stackTrace: stacktrace);
-                    }
-                  },
-                ),
-                ListTile(
                   title: const Text('Get Offline Region'),
                   onTap: () async {
                     try {
-                      final region =
-                          await manager.getOfflineRegion(regionId: 1);
+                      final region = await manager.getOfflineRegion(
+                        regionId: 1,
+                      );
                       _print('offline region: $region');
                     } on Exception catch (error, stacktrace) {
                       _print(error.toString());

@@ -20,6 +20,8 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           cache: true
+      - name: "Get Flutter dependencies"
+        run: dart pub get
       - name: Lint analysis
         run: dart format --set-exit-if-changed .
   lint-dart:
@@ -69,7 +71,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [ '3.27.0', '' ]
+        sdk: [ '3.32.0', '' ]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -166,7 +168,7 @@ jobs:
           sudo apt-get install webp && \
           dart pub global activate pana
       - name: Check package score
-        run: pana --exit-code-threshold 0 --no-dartdoc .
+        run: pana --exit-code-threshold 10 --no-dartdoc .
   build-android:
     name: "[Android] Build APK"
     runs-on: ubuntu-latest
@@ -176,7 +178,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [ '3.27.0', '' ]
+        sdk: [ '3.32.0', '' ]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -208,7 +210,7 @@ jobs:
 #    strategy:
 #      fail-fast: false
 #      matrix:
-#        sdk: [ '3.27.0', '' ]
+#        sdk: [ '3.32.0', '' ]
 #    steps:
 #      - uses: actions/checkout@v4
 #      - uses: subosito/flutter-action@v2
@@ -237,7 +239,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [ '3.27.0', '' ]
+        sdk: [ '3.32.0', '' ]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -257,7 +259,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sdk: [ '3.27.0', '' ]
+        sdk: [ '3.32.0', '' ]
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2

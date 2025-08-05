@@ -1,3 +1,67 @@
+## 0.2.2
+
+Maintenance release and some new functionality. 
+Thanks for your contribution in this release @jt274!
+
+## New Features
+
+- Migrate `requestLocationPermissions()` and `addLayer()` to use JNI
+- Update `jni` and `jnigen` to v0.14
+- Update `pigeon` to v25
+- Migrate gradle DSL to Kotlin
+- Add `LngLatBounds.fromPoints()` constructor.
+
+...and numerous other dependencies updated in this release.
+
+Full
+Changelog: [v0.2.1...v0.2.2](https://github.com/josxha/flutter-maplibre/compare/v0.2.1...v0.2.2)
+
+## 0.2.1
+
+This release builds upon the long anticipated merged threads in Flutter 3.29.0
+which removes the need of switching threads. Furthermore, the release contains a
+couple of features and new fixes.
+
+Thanks for your contributions for this release, @felix-larsen and @pamtbaau!
+
+### New Features
+
+- Upgrade MapLibre Native on Android
+  to [11.8.0](https://github.com/maplibre/maplibre-native/blob/main/platform/android/CHANGELOG.md#1180)
+  which introduces support for PMTiles.
+- Add `removePinchOnPressed` and `webRotationSpeed` as parameters to the
+  `MapCompass` widget.
+- Allow the `SourceAttribution` widget to use multiple lines for its
+  attributions.
+- Underline an attribution link for a `SourceAttribution` widget when hovered
+  with a cursor.
+- Add the parameter `allowInteraction` to the `WidgetLayer` that allows widgets
+  to detect gestures on these widgets.
+- Reintroduce awaitable `moveCamera()`, `animateCamera()` and `fitCamera()` on
+  Android.
+- Use synchronous JNI calls on Android to prevent thread hopping.
+
+### Bug Fixes
+
+- Fix exceptions when the map widget rebuilds a lot in a short amount of time.
+- Fix `moveCamera()`, `animateCamera()` and `fitCamera()` does not ignore null
+  parameters.
+- Fix app freeze on Android using Flutter 3.29.0 caused by the merged threads.
+- Fix exception when adding a RasterSource programatically.
+
+### Misc
+
+- Update examples and documentation.
+- Set minimum Flutter version
+  to [3.29.0](https://discord.com/channels/951867686378409984/951879268227485707/1339719764574081148)
+  and minimum Dart version
+  to [3.7.0](https://discord.com/channels/951867686378409984/951879268227485707/1339719747981545485).
+- Use the new code formatting.
+- Upgrade pigeon to 24.
+
+Full
+Changelog: [v0.2.0...v0.2.1](https://github.com/josxha/flutter-maplibre/compare/v0.2.0...v0.2.1)
+
 ## 0.2.0
 
 This release is a collection of user affecting changes along a couple of new

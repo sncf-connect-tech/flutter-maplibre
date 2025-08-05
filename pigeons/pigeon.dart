@@ -6,13 +6,13 @@ import 'package:pigeon/pigeon.dart';
     dartOptions: DartOptions(),
     dartPackageName: 'maplibre',
     // linux
-    gobjectHeaderOut: 'linux/pigeon.g.h',
-    gobjectSourceOut: 'linux/pigeon.g.cc',
-    gobjectOptions: GObjectOptions(),
+    // gobjectHeaderOut: 'linux/pigeon.g.h',
+    // gobjectSourceOut: 'linux/pigeon.g.cc',
+    // gobjectOptions: GObjectOptions(),
     // windows
-    cppOptions: CppOptions(namespace: 'pigeon_maplibre'),
-    cppHeaderOut: 'windows/runner/pigeon.g.h',
-    cppSourceOut: 'windows/runner/pigeon.g.cpp',
+    // cppOptions: CppOptions(namespace: 'pigeon_maplibre'),
+    // cppHeaderOut: 'windows/runner/pigeon.g.h',
+    // cppSourceOut: 'windows/runner/pigeon.g.cpp',
     // android
     kotlinOut: 'android/src/main/kotlin/com/github/josxha/maplibre/Pigeon.g.kt',
     kotlinOptions: KotlinOptions(),
@@ -164,9 +164,7 @@ abstract interface class MapLibreFlutterApi {
 abstract interface class PermissionManagerHostApi {
   /// Request location permissions.
   @async
-  bool requestLocationPermissions({
-    required String explanation,
-  });
+  bool requestLocationPermissions({required String explanation});
 }
 
 /// The map options define initial values for the MapLibre map.
@@ -319,7 +317,7 @@ enum TileScheme {
   xyz,
 
   /// OSGeo spec scheme.
-  tms;
+  tms,
 }
 
 /// The encoding used by this source. Mapbox Terrain RGB is used by default.
@@ -332,7 +330,7 @@ enum RasterDemEncoding {
 
   /// Decodes tiles using the redFactor, blueFactor, greenFactor, baseShift
   /// parameters.
-  custom;
+  custom,
 }
 
 /// The reason the camera is changing.
@@ -344,5 +342,5 @@ enum CameraChangeReason {
   apiAnimation,
 
   /// API gesture
-  apiGesture;
+  apiGesture,
 }
