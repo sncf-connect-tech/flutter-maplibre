@@ -1,6 +1,6 @@
-// We export the geotypes package here so that users don't have to add
+// We export the geobase package here so that users don't have to add
 // the dependency themselves.
-export 'package:geotypes/geotypes.dart';
+export 'package:geobase/geobase.dart';
 
 export 'src/android_platform_view_mode.dart';
 export 'src/layer/layer.dart';
@@ -20,7 +20,7 @@ export 'src/style/style.dart';
 export 'src/style_controller.dart';
 export 'src/ui/map_compass.dart';
 export 'src/ui/map_control_buttons.dart';
-export 'src/ui/map_scalebar.dart';
+export 'src/ui/map_scalebar.dart' hide ScaleBarPainter;
 export 'src/ui/source_attribution.dart';
 export 'src/utils.dart';
 export 'src/widget_layer.dart';

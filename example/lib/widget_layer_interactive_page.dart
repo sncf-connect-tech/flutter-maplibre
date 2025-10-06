@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:maplibre/maplibre.dart';
 
@@ -18,13 +15,13 @@ class _WidgetLayerPageState extends State<WidgetLayerInteractivePage> {
   final GlobalKey _mapKey = GlobalKey();
 
   final _markerPositions = [
-    Position(-10, 0),
-    Position(-5, 0),
-    Position(0, 0),
-    Position(5, 0),
+    const Geographic(lon: -10, lat: 0),
+    const Geographic(lon: -5, lat: 0),
+    const Geographic(lon: 0, lat: 0),
+    const Geographic(lon: 5, lat: 0),
   ];
 
-  Position? _originalPosition;
+  Geographic? _originalPosition;
   MapGestures _mapGestures = const MapGestures.all();
 
   @override
@@ -46,7 +43,7 @@ class _WidgetLayerPageState extends State<WidgetLayerInteractivePage> {
               key: _mapKey,
               options: MapOptions(
                 initZoom: 3,
-                initCenter: Position(0, 0),
+                initCenter: const Geographic(lon: 0, lat: 0),
                 gestures: _mapGestures,
               ),
               onMapCreated: (controller) => _controller = controller,
@@ -97,12 +94,7 @@ class _WidgetLayerPageState extends State<WidgetLayerInteractivePage> {
     );
   }
 
-  Future<Position> _toLngLat(Offset eventOffset) async {
-    // Only Android returns screen pixel, other platforms return logical pixels.
-    final pixelRatio = (!kIsWeb && Platform.isAndroid)
-        ? MediaQuery.devicePixelRatioOf(context)
-        : 1.0;
-
+  Future<Geographic> _toLngLat(Offset eventOffset) async {
     final mapRenderBox =
         _mapKey.currentContext?.findRenderObject() as RenderBox?;
 
@@ -115,7 +107,7 @@ class _WidgetLayerPageState extends State<WidgetLayerInteractivePage> {
       eventOffset.dy - mapOffset.dy,
     );
 
-    return _controller.toLngLat(offset.scale(pixelRatio, pixelRatio));
+    return _controller.toLngLat(offset);
   }
 
   void _onLongPress(int index, LongPressStartDetails details) {
@@ -166,7 +158,7 @@ class _WidgetLayerPageState extends State<WidgetLayerInteractivePage> {
 
   void _onPanStart(DragStartDetails details, int index) {
     // Keep original position in case of discarded move
-    _originalPosition = _markerPositions[index].clone();
+    _originalPosition = Geographic.from(_markerPositions[index]);
 
     setState(() {
       // Disable camera panning while a marker gets moved.

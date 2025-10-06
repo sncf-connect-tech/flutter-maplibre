@@ -60,6 +60,16 @@ class StyleControllerWeb implements StyleController {
   }
 
   @override
+  List<String> getLayerIds() {
+    final layers = _map.getStyle()?.layers.dartify() as List<Object?>?;
+    if (layers == null) return const [];
+    return layers
+        .map((l) => (l as Map<Object?, Object?>?)?['id'])
+        .whereType<String>()
+        .toList();
+  }
+
+  @override
   Future<void> addLayer(StyleLayer layer, {String? belowLayerId}) async {
     switch (layer) {
       case FillStyleLayer():
@@ -213,17 +223,17 @@ class StyleControllerWeb implements StyleController {
             // proceed in clockwise order.
             // https://github.com/maplibre/maplibre-gl-js/blob/87486a5ef2085e600e8fa4e31252629dd8488dcd/src/source/image_source.ts#L24
             coordinates: [
-              [source.coordinates.topLeft.lng, source.coordinates.topLeft.lat],
+              [source.coordinates.topLeft.lon, source.coordinates.topLeft.lat],
               [
-                source.coordinates.topRight.lng,
+                source.coordinates.topRight.lon,
                 source.coordinates.topRight.lat,
               ],
               [
-                source.coordinates.bottomRight.lng,
+                source.coordinates.bottomRight.lon,
                 source.coordinates.bottomRight.lat,
               ],
               [
-                source.coordinates.bottomLeft.lng,
+                source.coordinates.bottomLeft.lon,
                 source.coordinates.bottomLeft.lat,
               ],
             ].jsify()!,
@@ -236,7 +246,7 @@ class StyleControllerWeb implements StyleController {
             type: 'video',
             urls: source.urls.jsify()!,
             coordinates: source.coordinates
-                .map((e) => [e.lng, e.lat])
+                .map((e) => [e.lon, e.lat])
                 .toList(growable: false)
                 .jsify()!,
           ),

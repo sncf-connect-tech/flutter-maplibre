@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:math';
 import 'dart:ui_web';
@@ -54,7 +55,7 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
       _map = interop.JsMap(
         interop.MapOptions(
           container: _htmlElement,
-          style: options.initStyle,
+          style: _prepareStyleString(options.initStyle),
           zoom: options.initZoom,
           center: options.initCenter?.toLngLat(),
           bearing: options.initBearing,
@@ -91,22 +92,34 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
       _map.on(
         interop.MapEventType.click,
         (interop.MapMouseEvent event) {
-          final point = event.lngLat.toPosition();
-          widget.onEvent?.call(MapEventClick(point: point));
+          final point = event.lngLat.toGeographic();
+          widget.onEvent?.call(
+            MapEventClick(point: point, screenPoint: event.point.toOffset()),
+          );
         }.toJS,
       );
       _map.on(
         interop.MapEventType.dblclick,
         (interop.MapMouseEvent event) {
-          final point = event.lngLat.toPosition();
-          widget.onEvent?.call(MapEventDoubleClick(point: point));
+          final point = event.lngLat.toGeographic();
+          widget.onEvent?.call(
+            MapEventDoubleClick(
+              point: point,
+              screenPoint: event.point.toOffset(),
+            ),
+          );
         }.toJS,
       );
       _map.on(
         interop.MapEventType.contextmenu,
         (interop.MapMouseEvent event) {
-          final point = event.lngLat.toPosition();
-          widget.onEvent?.call(MapEventSecondaryClick(point: point));
+          final point = event.lngLat.toGeographic();
+          widget.onEvent?.call(
+            MapEventSecondaryClick(
+              point: point,
+              screenPoint: event.point.toOffset(),
+            ),
+          );
         }.toJS,
       );
       _map.on(
@@ -134,7 +147,7 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
         interop.MapEventType.move,
         (interop.MapLibreEvent event) {
           final mapCamera = MapCamera(
-            center: _map.getCenter().toPosition(),
+            center: _map.getCenter().toGeographic(),
             zoom: _map.getZoom().toDouble(),
             pitch: _map.getPitch().toDouble(),
             bearing: _map.getBearing().toDouble(),
@@ -204,42 +217,26 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
   }
 
   @override
-  Position toLngLatSync(Offset screenLocation) =>
-      _map.unproject(screenLocation.toJsPoint()).toPosition();
+  Geographic toLngLat(Offset screenLocation) =>
+      _map.unproject(screenLocation.toJsPoint()).toGeographic();
 
   @override
-  List<Position> toLngLatsSync(List<Offset> screenLocations) => screenLocations
-      .map((offset) => _map.unproject(offset.toJsPoint()).toPosition())
+  List<Geographic> toLngLats(List<Offset> screenLocations) => screenLocations
+      .map((offset) => _map.unproject(offset.toJsPoint()).toGeographic())
       .toList(growable: false);
 
   @override
-  Offset toScreenLocationSync(Position lngLat) =>
+  Offset toScreenLocation(Geographic lngLat) =>
       _map.project(lngLat.toLngLat()).toOffset();
 
   @override
-  List<Offset> toScreenLocationsSync(List<Position> lngLats) => lngLats
+  List<Offset> toScreenLocations(List<Geographic> lngLats) => lngLats
       .map((lngLat) => _map.project(lngLat.toLngLat()).toOffset())
       .toList(growable: false);
 
   @override
-  Future<Position> toLngLat(Offset screenLocation) async =>
-      toLngLatSync(screenLocation);
-
-  @override
-  Future<Offset> toScreenLocation(Position lngLat) async =>
-      toScreenLocationSync(lngLat);
-
-  @override
-  Future<List<Position>> toLngLats(List<Offset> screenLocations) async =>
-      toLngLatsSync(screenLocations);
-
-  @override
-  Future<List<Offset>> toScreenLocations(List<Position> lngLats) async =>
-      toScreenLocationsSync(lngLats);
-
-  @override
   Future<void> moveCamera({
-    Position? center,
+    Geographic? center,
     double? zoom,
     double? bearing,
     double? pitch,
@@ -248,7 +245,7 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
     final camera = getCamera();
     _map.jumpTo(
       interop.JumpToOptions(
-        center: center?.toLngLat(),
+        center: center?.toLngLat() ?? camera.center.toLngLat(),
         zoom: zoom ?? camera.zoom,
         bearing: bearing ?? camera.bearing,
         pitch: pitch ?? camera.pitch,
@@ -258,7 +255,7 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
 
   @override
   Future<void> animateCamera({
-    Position? center,
+    Geographic? center,
     double? zoom,
     double? bearing,
     double? pitch,
@@ -336,7 +333,7 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
 
   @override
   MapCamera getCamera() => MapCamera(
-    center: _map.getCenter().toPosition(),
+    center: _map.getCenter().toGeographic(),
     zoom: _map.getZoom().toDouble(),
     pitch: _map.getPitch().toDouble(),
     bearing: _map.getBearing().toDouble(),
@@ -344,20 +341,13 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
 
   /// https://wiki.openstreetmap.org/wiki/Zoom_levels
   @override
-  Future<double> getMetersPerPixelAtLatitude(double latitude) async =>
-      getMetersPerPixelAtLatitudeSync(latitude);
-
-  @override
-  Future<LngLatBounds> getVisibleRegion() async => getVisibleRegionSync();
-
-  @override
-  double getMetersPerPixelAtLatitudeSync(double latitude) =>
+  double getMetersPerPixelAtLatitude(double latitude) =>
       circumferenceOfEarth *
       cos(latitude * degree2Radian) /
       pow(2, _map.getZoom() + 9);
 
   @override
-  LngLatBounds getVisibleRegionSync() {
+  LngLatBounds getVisibleRegion() {
     final bounds = _map.getBounds();
     return LngLatBounds(
       longitudeWest: bounds.getWest().toDouble(),
@@ -428,7 +418,53 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
   }
 
   @override
-  Future<List<QueriedLayer>> queryLayers(Offset screenLocation) async {
+  List<RenderedFeature> featuresAtPoint(
+    Offset point, {
+    List<String>? layerIds,
+  }) {
+    final features = _map
+        .queryRenderedFeatures(
+          point.toJsPoint(),
+          interop.QueryRenderedFeaturesOptions(
+            layers: layerIds?.map((l) => l.toJS).toList(growable: false).toJS,
+          ),
+        )
+        .toDart;
+    return features
+        .map(
+          (f) => RenderedFeature(
+            id: f.id.dartify(),
+            properties: f.properties.asStringMap() ?? {},
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  @override
+  List<RenderedFeature> featuresInRect(
+    Rect rect, {
+    List<String>? layerIds,
+  }) {
+    final features = _map
+        .queryRenderedFeaturesRect(
+          [rect.bottomLeft.toJsPoint(), rect.topRight.toJsPoint()].toJS,
+          interop.QueryRenderedFeaturesOptions(
+            layers: layerIds?.map((l) => l.toJS).toList(growable: false).toJS,
+          ),
+        )
+        .toDart;
+    return features
+        .map(
+          (f) => RenderedFeature(
+            id: f.id.dartify(),
+            properties: f.properties.asStringMap() ?? {},
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  @override
+  List<QueriedLayer> queryLayers(Offset screenLocation) {
     final features = _map.queryRenderedFeatures(
       screenLocation.toJsPoint(),
       null,
@@ -444,15 +480,39 @@ final class MapLibreMapStateWeb extends MapLibreMapState {
         .toList(growable: false);
   }
 
+  JSAny _prepareStyleString(String style) {
+    final trimmed = style.trim();
+    if (trimmed.startsWith('{')) {
+      // Raw JSON
+      final json = jsonDecode(trimmed) as Map<String, dynamic>;
+      final jsified = json.jsify();
+      if (jsified == null) {
+        throw StateError('Failed to convert style JSON to JS object.');
+      }
+      return jsified;
+    } else if (trimmed.startsWith('/')) {
+      // path
+      return trimmed.toJS;
+    } else if (!trimmed.startsWith('http://') &&
+        !trimmed.startsWith('https://') &&
+        !trimmed.startsWith('mapbox://')) {
+      // flutter asset
+      return AssetManager().getAssetUrl(trimmed).toJS;
+    } else {
+      // URI
+      return trimmed.toJS;
+    }
+  }
+
   @override
-  Future<void> setStyle(String style) async {
+  void setStyle(String style) {
     _map.once(
       interop.MapEventType.styleLoad,
       (JSAny _) {
         _onStyleLoaded();
       }.toJS,
     );
-    _map.setStyle(style);
+    _map.setStyle(_prepareStyleString(style));
   }
 
   void _onStyleLoaded() {

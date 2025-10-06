@@ -4,29 +4,34 @@ import 'package:maplibre/maplibre.dart';
 import 'package:maplibre/src/platform/android/jni.dart' as jni;
 import 'package:maplibre/src/platform/pigeon.g.dart' as pigeon;
 
-/// Extension methods for the [Position] class. Not exported publicly.
-extension PositionExt on Position {
-  /// Convert a [Position] to an internal [pigeon.LngLat].
-  pigeon.LngLat toLngLat() =>
-      pigeon.LngLat(lng: lng.toDouble(), lat: lat.toDouble());
+/// Extension methods for the [Geographic] class. Not exported publicly.
+extension GeographicExt on Geographic {
+  /// Convert a [Geographic] to an internal [pigeon.LngLat].
+  pigeon.LngLat toLngLat() => pigeon.LngLat(lng: lon, lat: lat);
 
-  /// Convert a [Position] to an [jni.LatLng].
-  jni.LatLng toLatLng() => jni.LatLng.new$1(lat.toDouble(), lng.toDouble());
+  /// Convert a [Geographic] to an [jni.LatLng].
+  jni.LatLng toLatLng() => jni.LatLng.new$1(lat, lon);
 }
 
 /// Extension methods for the [pigeon.LngLat] class. Not exported publicly.
 extension LngLatExt on pigeon.LngLat {
-  /// Convert an internal [pigeon.LngLat] to a [Position].
-  Position toPosition() => Position(lng, lat);
+  /// Convert an internal [pigeon.LngLat] to a [Geographic].
+  Geographic toGeographic() => Geographic(lon: lng, lat: lat);
+}
+
+/// Extension methods for the [pigeon.Offset] class. Not exported publicly.
+extension PigeonOffsetExt on pigeon.Offset {
+  /// Convert an internal [pigeon.Offset] to a [Offset].
+  Offset toOffset() => Offset(x, y);
 }
 
 /// Extension methods for the [jni.LatLng] class. Not exported publicly.
 extension JniLatLngExt on jni.LatLng {
-  /// Convert an internal [jni.LatLng] to a [Position].
-  Position toPosition({bool releaseOriginal = false}) {
-    final position = Position(getLongitude(), getLatitude());
+  /// Convert an internal [jni.LatLng] to a [Geographic].
+  Geographic toGeographic({bool releaseOriginal = false}) {
+    final point = Geographic(lon: getLongitude(), lat: getLatitude());
     if (releaseOriginal) release();
-    return position;
+    return point;
   }
 }
 
@@ -46,7 +51,7 @@ extension OffsetExt on Offset {
   pigeon.Offset toOffset() => pigeon.Offset(x: dx, y: dy);
 
   /// Convert an [Offset] to an [jni.PointF].
-  jni.PointF toPointF() => jni.PointF.new$1(dx, dy);
+  jni.PointF toPointF() => jni.PointF.new$3(dx, dy);
 }
 
 /// Extension methods for the [LngLatBounds] class. Not exported publicly.

@@ -5,16 +5,15 @@ import XCTest
 // If your plugin has been explicitly set to "type: .dynamic" in the Package.swift,
 // you will need to add your plugin as a dependency of RunnerTests within Xcode.
 
-@testable import maplibre
+@testable import maplibre_ios
 
 // This demonstrates a simple unit test of the Swift portion of this plugin's implementation.
 //
 // See https://developer.apple.com/documentation/xctest for more information about using XCTest.
 
 class RunnerTests: XCTestCase {
-
   func testGetPlatformVersion() {
-    let plugin = MaplibrePlugin()
+    let plugin = MaplibreIosPlugin()
 
     let call = FlutterMethodCall(methodName: "getPlatformVersion", arguments: [])
 
@@ -25,5 +24,4 @@ class RunnerTests: XCTestCase {
     }
     waitForExpectations(timeout: 1)
   }
-
 }

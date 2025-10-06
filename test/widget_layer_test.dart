@@ -9,8 +9,8 @@ import 'shared/mocks.dart';
 void main() {
   group('WidgetLayer', () {
     testWidgets('one marker', (tester) async {
-      final camera = MapCamera(
-        center: Position(0, 0),
+      const camera = MapCamera(
+        center: Geographic(lon: 0, lat: 0),
         zoom: 0,
         bearing: 180,
         pitch: 0,
@@ -18,21 +18,18 @@ void main() {
       final controller = MockMapController();
       when(controller.getCamera).thenReturn(camera);
       const offsets = [Offset(123, 423)];
-      when(
-        () => controller.toScreenLocations(any()),
-      ).thenAnswer((_) async => offsets);
-      when(() => controller.toScreenLocationsSync(any())).thenReturn(offsets);
-      final marker = Marker(
-        point: Position(0, 0),
-        size: const Size.square(50),
-        child: const Icon(Icons.location_on, size: 50),
+      when(() => controller.toScreenLocations(any())).thenReturn(offsets);
+      const marker = Marker(
+        point: Geographic(lon: 0, lat: 0),
+        size: Size.square(50),
+        child: Icon(Icons.location_on, size: 50),
         alignment: Alignment.bottomCenter,
         rotate: true,
       );
       final app = App(
         camera: camera,
         controller: controller,
-        children: [
+        children: const [
           WidgetLayer(markers: [marker]),
         ],
       );
@@ -54,8 +51,8 @@ void main() {
     });
 
     testWidgets('multiple markers', (tester) async {
-      final camera = MapCamera(
-        center: Position(0, 0),
+      const camera = MapCamera(
+        center: Geographic(lon: 0, lat: 0),
         zoom: 0,
         bearing: 180,
         pitch: 0,
@@ -63,29 +60,26 @@ void main() {
       final controller = MockMapController();
       when(controller.getCamera).thenReturn(camera);
       const offsets = [Offset(1, 100), Offset(2, 100), Offset(3, 300)];
-      when(
-        () => controller.toScreenLocations(any()),
-      ).thenAnswer((_) async => offsets);
-      when(() => controller.toScreenLocationsSync(any())).thenReturn(offsets);
+      when(() => controller.toScreenLocations(any())).thenReturn(offsets);
       const size = 50.0;
       final markers = [
-        Marker(
-          point: Position(1, 1),
-          size: const Size.square(size),
+        const Marker(
+          point: Geographic(lon: 1, lat: 1),
+          size: Size.square(size),
           alignment: Alignment.topLeft,
-          child: const Icon(Icons.circle, size: size),
+          child: Icon(Icons.circle, size: size),
         ),
-        Marker(
-          point: Position(2, 1),
-          size: const Size.square(size),
+        const Marker(
+          point: Geographic(lon: 2, lat: 1),
+          size: Size.square(size),
           alignment: Alignment.topLeft,
-          child: const Icon(Icons.square, size: size),
+          child: Icon(Icons.square, size: size),
         ),
-        Marker(
-          point: Position(3, 1),
-          size: const Size.square(size),
+        const Marker(
+          point: Geographic(lon: 3, lat: 1),
+          size: Size.square(size),
           alignment: Alignment.topLeft,
-          child: const Icon(Icons.emoji_emotions, size: size),
+          child: Icon(Icons.emoji_emotions, size: size),
         ),
       ];
       final app = App(
@@ -106,8 +100,8 @@ void main() {
       );
       final positioned = tester.firstWidget<Positioned>(finder);
       // defaultTargetPlatform defaults to Android in the tests
-      expect(positioned.left, closeTo(offsets.first.dx / 3, 0.01));
-      expect(positioned.top, closeTo(offsets.first.dy / 3, 0.01));
+      expect(positioned.left, closeTo(offsets.first.dx, 0.01));
+      expect(positioned.top, closeTo(offsets.first.dy, 0.01));
       expect(positioned.width, closeTo(size, 0.01));
       expect(positioned.height, closeTo(size, 0.01));
     });

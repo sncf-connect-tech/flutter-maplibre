@@ -11,6 +11,7 @@ class App extends StatelessWidget {
     this.onMapCreated,
     this.onStyleLoaded,
     this.onEvent,
+    this.children = const [],
     super.key,
   });
 
@@ -18,6 +19,7 @@ class App extends StatelessWidget {
   final MapCreatedCallback? onMapCreated;
   final MapEventCallback? onEvent;
   final StyleLoadedCallback? onStyleLoaded;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +27,13 @@ class App extends StatelessWidget {
       title: 'MapLibre Demo',
       home: Scaffold(
         body: MapLibreMap(
-          options: options ?? MapOptions(initCenter: Position(0, 0)),
+          options:
+              options ??
+              const MapOptions(initCenter: Geographic(lon: 0, lat: 0)),
           onMapCreated: onMapCreated,
           onStyleLoaded: onStyleLoaded,
           onEvent: onEvent,
+          children: children,
         ),
       ),
     );
