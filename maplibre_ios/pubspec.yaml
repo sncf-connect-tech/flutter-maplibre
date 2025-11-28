@@ -1,6 +1,6 @@
 name: maplibre_ios
 description: "Helper package for maplibre that provides iOS FFI bindings"
-version: 0.3.0
+version: 0.3.1
 repository: https://github.com/josxha/flutter-maplibre
 issue_tracker: https://github.com/josxha/flutter-maplibre/issues
 homepage: https://flutter-maplibre.pages.dev
@@ -40,10 +40,10 @@ ffigen:
   objc-interfaces:
     include:
       - 'NSString'
-      - 'MapLibreRegistry'
       - 'CLLocationCoordinate2D'
       - 'NSAttributedString'
-      - 'NSImage'
+      - 'UIImage'
+      - 'UIScreen'
       - 'UIAction'
       - 'UIMenu'
       - 'UIPointerEffect'
@@ -55,15 +55,20 @@ ffigen:
       - 'UIViewConfigurationState'
       - 'NSExpression'
       - 'Helpers'
+      - 'MapLibreRegistry'
+      - 'Extensions'
       - 'MLN.*'
     module:
       'MapLibreRegistry': 'maplibre_ios'
       'Helpers': 'maplibre_ios'
+      'Extensions': 'maplibre_ios'
       'MLNMapView': 'MapLibre'
       'MLNMapCamera': 'MapLibre'
       'MLNVectorTileSource': 'MapLibre'
       'MLNOfflinePack': 'MapLibre'
       'MLNOfflineRegion': 'MapLibre'
+      'UIImage': 'UIKit'
+      'UIScreen': 'UIKit'
     member-filter:
       'UIResponder':
         exclude:
@@ -86,7 +91,7 @@ ffigen:
     - '-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
   headers:
     entry-points:
-      - 'ios/maplibre_ios/Sources/maplibre_ios/MapLibreRegistry.h'
+      - 'ios/maplibre_ios/Sources/maplibre_ios/MapLibreIos.h'
       - 'MapLibre.h'
   preamble: |
     // ignore_for_file: type=lint, unused_element, unused_field |

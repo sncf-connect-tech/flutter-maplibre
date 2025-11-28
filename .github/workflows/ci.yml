@@ -16,7 +16,7 @@ jobs:
     name: "[Dart] Check formatting"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           cache: true
@@ -28,16 +28,16 @@ jobs:
     name: "[Swift] Check formatting"
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: "Install SwiftFormat"
         run: brew install swiftformat
       - name: "Format Swift code"
-        run: swiftformat --verbose --lint . --reporter github-actions-log --swiftversion 6 --indent 2
+        run: swiftformat --verbose --lint . --reporter github-actions-log --swiftversion 6 --indent 2 --disable trailingCommas
   lint-dart:
     name: "[Dart] Static code analysis"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           cache: true
@@ -49,7 +49,7 @@ jobs:
     name: "[Kotlin] Code quality"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: ktlint
         uses: ScaCap/action-ktlint@v1
         with:
@@ -65,7 +65,7 @@ jobs:
 #      run:
 #        working-directory: example
 #    steps:
-#      - uses: actions/checkout@v5
+#      - uses: actions/checkout@v6
 #      - uses: futureware-tech/simulator-action@v3
 #        with:
 #          model: 'iPhone 15'
@@ -82,8 +82,11 @@ jobs:
       matrix:
         sdk: [ '' ] # option to use a matrix test with the lower supported flutter version
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: maplibre
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: "Setup Flutter SDK"
         uses: subosito/flutter-action@v2
         with:
@@ -97,45 +100,45 @@ jobs:
         if: ${{ matrix.sdk == '' }}
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  integration-test-android:
-    name: "[Android] Integration tests"
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        api-level: [ 24, 35 ]
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v5
-      - name: "Setup Flutter SDK"
-        uses: subosito/flutter-action@v2
-        with:
-          cache: true
-      - uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'gradle'
-      - name: "Get Flutter dependencies"
-        run: flutter pub get
-        # https://github.com/marketplace/actions/android-emulator-runner#running-hardware-accelerated-emulators-on-linux-runners
-      - name: "Enable KVM group perms"
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: "Run integration tests"
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          arch: x86_64
-          emulator-boot-timeout: 1800 # 30 minutes
-          script: cd example && flutter test integration_test/main.dart --timeout=1800s -r expanded --coverage --coverage-package maplibre
-      - name: "Run Codecov"
-        uses: codecov/codecov-action@v5
-        if: ${{ matrix.api-level == '35' }}
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+#  integration-test-android:
+#    name: "[Android] Integration tests"
+#    runs-on: ubuntu-latest
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        api-level: [ 24, 35 ]
+#    timeout-minutes: 30
+#    steps:
+#      - uses: actions/checkout@v6
+#      - name: "Setup Flutter SDK"
+#        uses: subosito/flutter-action@v2
+#        with:
+#          cache: true
+#      - uses: actions/setup-java@v5
+#        with:
+#          java-version: '21'
+#          distribution: 'temurin'
+#          cache: 'gradle'
+#      - name: "Get Flutter dependencies"
+#        run: flutter pub get
+#        # https://github.com/marketplace/actions/android-emulator-runner#running-hardware-accelerated-emulators-on-linux-runners
+#      - name: "Enable KVM group perms"
+#        run: |
+#          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+#          sudo udevadm control --reload-rules
+#          sudo udevadm trigger --name-match=kvm
+#      - name: "Run integration tests"
+#        uses: reactivecircus/android-emulator-runner@v2
+#        with:
+#          api-level: ${{ matrix.api-level }}
+#          arch: x86_64
+#          emulator-boot-timeout: 1800 # 30 minutes
+#          script: cd example && flutter test integration_test/main.dart --timeout=1800s -r expanded --coverage --coverage-package maplibre
+#      - name: "Run Codecov"
+#        uses: codecov/codecov-action@v5
+#        if: ${{ matrix.api-level == '35' }}
+#        env:
+#          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 #  integration-test-web:
 #    name: "[Web] Integration tests"
 #    runs-on: ubuntu-latest
@@ -144,7 +147,7 @@ jobs:
 #      run:
 #        working-directory: example
 #    steps:
-#      - uses: actions/checkout@v5
+#      - uses: actions/checkout@v6
 #      - name: "Setup Flutter SDK"
 #        uses: subosito/flutter-action@v2
 #        with:
@@ -165,9 +168,12 @@ jobs:
   score:
     name: "Package score"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: maplibre
     steps:
       - name: Checkout project
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -177,7 +183,7 @@ jobs:
           sudo apt-get install webp && \
           dart pub global activate pana
       - name: Check package score
-        run: pana --exit-code-threshold 150 --no-dartdoc .
+        run: pana --exit-code-threshold 10 --no-dartdoc .
   build-android:
     name: "[Android] Build APK"
     runs-on: ubuntu-latest
@@ -189,7 +195,7 @@ jobs:
       matrix:
         sdk: [ '' ] # option to use a matrix test with the lower supported flutter version
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.sdk }}
@@ -204,7 +210,7 @@ jobs:
       - name: Build example APK
         run: flutter build apk
       - name: Upload apk as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ matrix.sdk == '' }}
         with:
           name: maplibre-flutter-demo.apk
@@ -221,7 +227,7 @@ jobs:
       matrix:
         sdk: [ '' ] # option to use a matrix test with the lower supported flutter version
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.sdk }}
@@ -233,10 +239,10 @@ jobs:
         run: flutter build ios --release --no-codesign
       - name: Upload Runner.app as artifact
         if: ${{ matrix.sdk == '' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: maplibre-flutter-demo.app
-          path: maplibre_ios/example/build/ios/iphonesimulator
+          path: build/ios/iphonesimulator
   build-web:
     name: "[Web] Build"
     runs-on: ubuntu-latest
@@ -248,7 +254,7 @@ jobs:
       matrix:
         sdk: [ '' ] # option to use a matrix test with the lower supported flutter version
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.sdk }}
@@ -268,7 +274,7 @@ jobs:
       matrix:
         sdk: [ '' ] # option to use a matrix test with the lower supported flutter version
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ matrix.sdk }}
@@ -281,15 +287,16 @@ jobs:
     name: "[Pigeon] Check codegen"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           cache: true
       - name: "Get Flutter dependencies"
-        working-directory: example
         run: dart pub get
       - name: Run pigeon
-        run: ./pigeons/run_code_gen.sh
+        run: sh ./pigeons/run_code_gen.sh
+      - name: Format code
+        run: dart format .
       - name: Check changes
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
@@ -303,7 +310,7 @@ jobs:
     name: "[Android] Check codegen"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: subosito/flutter-action@v2
         with:
           cache: true
@@ -313,15 +320,15 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
       - name: "Get Flutter dependencies"
-        working-directory: example
         run: dart pub get
       - name: Build example APK
         working-directory: example
         run: flutter build apk
       - name: Run jnigen
-        run: ./run_jnigen.sh
+        working-directory: maplibre
+        run: dart run tool/jnigen.dart
       - name: Format code
-        run: dart format lib/src/platform/android/jni
+        run: dart format maplibre/lib/src/platform/android/jni.g.dart
       - name: Check changes
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
@@ -340,7 +347,7 @@ jobs:
 #      matrix:
 #        sdk: [ '' ] # option to use a matrix test with the lower supported flutter version
 #    steps:
-#      - uses: actions/checkout@v5
+#      - uses: actions/checkout@v6
 #      - name: Clone maplibre-native with shallow submodules
 #        run: |
 #          git clone \

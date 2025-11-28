@@ -15,7 +15,7 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     viewId: Int64,
     binaryMessenger: FlutterBinaryMessenger
   ) {
-    print("### init new MapViewDelegate ### \(viewId) ###")
+    // print("### init new MapViewDelegate ### \(viewId) ###")
     var channelSuffix = String(viewId)
     _viewId = viewId
     _flutterApi = MapLibreFlutterApi(
@@ -34,10 +34,31 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
         self._mapOptions = mapOptions
 
         // TODO(josxha): match the implementation from `setStyle()`
-        if mapOptions.style.hasPrefix("{") || mapOptions.style.hasPrefix("[") {
-          self._mapView = MLNMapView(frame: self._view.bounds, styleJSON: mapOptions.style)
+        var style = mapOptions.style
+        if style.hasPrefix("{") {
+          self._mapView = MLNMapView(frame: self._view.bounds, styleJSON: style)
+        } else if style.hasPrefix("/") {
+          var styleUrl = URL(string: "file://\(style)")
+          self._mapView = MLNMapView(frame: self._view.bounds, styleURL: styleUrl)
+        } else if !style.hasPrefix("http://"), !style.hasPrefix("https://"),
+                  !style.hasPrefix("mapbox://")
+        {
+          if let assetPath = Bundle.main.path(
+            forResource: style.replacingOccurrences(of: ".json", with: ""),
+            ofType: "json",
+            inDirectory: "Frameworks/App.framework/flutter_assets"
+          ) {
+            do {
+              let content = try String(contentsOfFile: assetPath, encoding: .utf8)
+              self._mapView = MLNMapView(frame: self._view.bounds, styleJSON: content)
+            } catch {
+              print("❌ Failed to read Flutter asset: \(error)")
+            }
+          } else {
+            print("❌ Could not find Flutter asset at path.")
+          }
         } else {
-          self._mapView = MLNMapView(frame: self._view.bounds, styleURL: URL(string: mapOptions.style))
+          self._mapView = MLNMapView(frame: self._view.bounds, styleURL: URL(string: style))
         }
 
         MapLibreRegistry.addMap(viewId: viewId, map: self._mapView)
@@ -78,10 +99,23 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
         self._mapView.allowsScrolling = mapOptions.gestures.pan
         self._mapView.allowsTilting = mapOptions.gestures.tilt
         self._mapView.allowsZooming = mapOptions.gestures.zoom
+        if let bounds = mapOptions.maxBounds {
+          var mlnBounds = MLNCoordinateBounds(
+            sw: CLLocationCoordinate2D(
+              latitude: bounds.latitudeSouth, longitude: bounds.longitudeWest
+            ),
+            ne: CLLocationCoordinate2D(
+              latitude: bounds.latitudeNorth, longitude: bounds.longitudeEast
+            )
+          )
+          self._mapView.maximumScreenBounds = mlnBounds
+        }
 
         self._flutterApi.onMapReady { _ in }
 
-        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(self.onDoubleTap(sender:)))
+        let doubleTap = UITapGestureRecognizer(
+          target: self, action: #selector(self.onDoubleTap(sender:))
+        )
         doubleTap.numberOfTapsRequired = 2
         self._mapView.addGestureRecognizer(doubleTap)
 
@@ -93,7 +127,9 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
         self._mapView.addGestureRecognizer(singleTap)
 
         if #available(iOS 13.4, *) {
-          let secondaryTap = UITapGestureRecognizer(target: self, action: #selector(self.onSecondaryTap(sender:)))
+          let secondaryTap = UITapGestureRecognizer(
+            target: self, action: #selector(self.onSecondaryTap(sender:))
+          )
           secondaryTap.buttonMaskRequired = .secondary
           self._mapView.addGestureRecognizer(secondaryTap)
         }
@@ -107,15 +143,6 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
         print(error)
       }
     }
-  }
-
-  func dispose() throws {
-    print("### dispose MapLibre view ### \(_viewId) ###")
-    MapLibreRegistry.removeMap(viewId: _viewId)
-    _mapView.removeFromSuperview()
-    _mapView.delegate = nil
-    _mapView = nil
-    _view.removeFromSuperview()
   }
 
   @objc func onTap(sender: UITapGestureRecognizer) {
@@ -175,7 +202,7 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     _mapView.setCamera(camera, animated: false)
 
     _mapView = mapView
-    print("mapView didFinishLoading, call onStyleLoaded")
+    // print("mapView didFinishLoading, call onStyleLoaded")
     _flutterApi.onStyleLoaded { _ in }
   }
 
@@ -200,100 +227,14 @@ class MapLibreView: NSObject, FlutterPlatformView, MLNMapViewDelegate,
     _flutterApi.onMoveCamera(camera: pigeonCamera) { _ in }
   }
 
-  func addFillLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addCircleLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addBackgroundLayer(
-    id _: String, layout _: [String: Any], paint _: [String: Any],
-    belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addFillExtrusionLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addHeatmapLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addHillshadeLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addLineLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addRasterLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func addSymbolLayer(
-    id _: String, sourceId _: String, layout _: [String: Any],
-    paint _: [String: Any], belowLayerId _: String?,
-    completion: @escaping (Result<Void, Error>) -> Void
-  ) {
-    completion(.success(()))
-  }
-
-  func loadImage(
-    url _: String,
-    completion _: @escaping (Result<FlutterStandardTypedData, Error>) ->
-      Void
-  ) {
-    // completion(.success((bytes)))
-  }
-
   func addImage(
     id: String, bytes: FlutterStandardTypedData,
     completion: @escaping (Result<Void, Error>) -> Void
   ) {
-    // Main Thread Checker: UI API called on a background thread: -[UIView frame]
-    // DispatchQueue.main.async {
-    print("addImage before")
     var style = _mapView.style!
     var imageData = bytes.data
     var image = UIImage(data: imageData, scale: UIScreen.main.scale)!
     style.setImage(image, forName: id)
-    print("addImage afters")
-    print("added image: \(style.image(forName: id))")
-    // }
     completion(.success(()))
   }
 }

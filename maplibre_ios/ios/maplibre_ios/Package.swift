@@ -28,8 +28,8 @@ let package = Package(
       ],
       cSettings: [
         .headerSearchPath("include/maplibre_ios"),
-      ],
-    ),
+      ]
+    )
     // FOR LOCAL LIBRARY
     // .binaryTarget(
     //   name: "MapLibre",

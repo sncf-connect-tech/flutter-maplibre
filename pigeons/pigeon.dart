@@ -2,7 +2,7 @@ import 'package:pigeon/pigeon.dart';
 
 @ConfigurePigeon(
   PigeonOptions(
-    dartOut: 'lib/src/platform/pigeon.g.dart',
+    dartOut: 'maplibre/lib/src/platform/pigeon.g.dart',
     dartOptions: DartOptions(),
     dartPackageName: 'maplibre',
     copyrightHeader: 'pigeons/header.txt',
@@ -15,8 +15,8 @@ import 'package:pigeon/pigeon.dart';
     // cppHeaderOut: 'windows/runner/pigeon.g.h',
     // cppSourceOut: 'windows/runner/pigeon.g.cpp',
     // android
-    kotlinOut: 'android/src/main/kotlin/com/github/josxha/maplibre/Pigeon.g.kt',
-    kotlinOptions: KotlinOptions(),
+    // kotlinOut: 'android/src/main/kotlin/com/github/josxha/maplibre/Pigeon.g.kt',
+    // kotlinOptions: KotlinOptions(),
     // ios
     swiftOut:
         'maplibre_ios/ios/maplibre_ios/Sources/maplibre_ios/Pigeon.g.swift',
@@ -24,103 +24,8 @@ import 'package:pigeon/pigeon.dart';
   ),
 )
 @HostApi()
+// ignore: one_member_abstracts
 abstract interface class MapLibreHostApi {
-  void dispose();
-
-  /// Add a fill layer to the map style.
-  @async
-  void addFillLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a circle layer to the map style.
-  @async
-  void addCircleLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a background layer to the map style.
-  @async
-  void addBackgroundLayer({
-    required String id,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a fill extrusion layer to the map style.
-  @async
-  void addFillExtrusionLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a heatmap layer to the map style.
-  @async
-  void addHeatmapLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a hillshade layer to the map style.
-  @async
-  void addHillshadeLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a line layer to the map style.
-  @async
-  void addLineLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a raster layer to the map style.
-  @async
-  void addRasterLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Add a symbol layer to the map style.
-  @async
-  void addSymbolLayer({
-    required String id,
-    required String sourceId,
-    required Map<String, Object> layout,
-    required Map<String, Object> paint,
-    String? belowLayerId,
-  });
-
-  /// Loads an image to the map. An image needs to be loaded before it can
-  /// get used.
-  @async
-  Uint8List loadImage(String url);
-
   /// Add an image to the map.
   @async
   void addImage(String id, Uint8List bytes);
@@ -206,10 +111,8 @@ class MapOptions {
   const MapOptions({
     required this.style,
     required this.zoom,
-    required this.center,
     required this.pitch,
     required this.bearing,
-    required this.maxBounds,
     required this.minZoom,
     required this.maxZoom,
     required this.minPitch,
@@ -218,6 +121,8 @@ class MapOptions {
     required this.androidTextureMode,
     required this.androidTranslucentTextureSurface,
     required this.androidForegroundLoadColor,
+    required this.center,
+    required this.maxBounds,
   });
 
   /// The URL of the used map style.
